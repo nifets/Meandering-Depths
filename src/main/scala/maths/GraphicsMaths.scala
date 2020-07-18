@@ -1,4 +1,5 @@
 package maths
+
 import breeze.linalg._
 import scala.math._
 
