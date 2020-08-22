@@ -30,7 +30,7 @@ object Shader {
 
     def apply(shaderType: Int, path: String): Shader = {
         val shader = new Shader(shaderType)
-        val source = Source.fromFile(path)
+        val source = Source.fromResource(path)
         shader.source(source.mkString)
         source.close
         shader.compile()

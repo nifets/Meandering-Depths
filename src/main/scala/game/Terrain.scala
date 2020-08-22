@@ -41,7 +41,7 @@ class Terrain {
     val offset = 0.2F
 
     val computeShader = {
-        val res = ShaderProgram.computeProgram("src/main/glsl/shaders/marchingCubes.glsl")
+        val res = ShaderProgram.computeProgram("shaders/marchingCubes.glsl")
         val ssbo = glGenBuffers()
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo)
         val auxTables = MemoryUtil.memAllocInt(256*16 + 12*2 + 8)

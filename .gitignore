@@ -1,4 +1,6 @@
 .bloop/
 .metals/
 .atomignore
+.gitignore
 target/
+README.md

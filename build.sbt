@@ -33,13 +33,19 @@ lazy val root = (project in file("."))
 
 		"org.lwjgl" % "lwjgl-glfw" % "3.2.2" classifier s"natives-windows",
 
-    "org.scalactic" %% "scalactic" % "3.1.2",
+        "org.scalactic" %% "scalactic" % "3.1.2",
 
-    "org.scalatest" %% "scalatest" % "3.1.2" % "test",
+        "org.scalatest" %% "scalatest" % "3.1.2" % "test",
 
-    "org.scalacheck" %% "scalacheck" % "1.14.1" % "test"
-	)
-
+        "org.scalacheck" %% "scalacheck" % "1.14.1" % "test"
+	),
+    mainClass in assembly := Some("core.MeanderingDepths"),
+    assemblyJarName in assembly := "MeanderingDepths.jar",
+    test in assembly := {},
+    assemblyMergeStrategy in assembly := {
+        case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+        case x => MergeStrategy.first
+    }
 
 
   )

@@ -55,8 +55,8 @@ class MeanderingDepths extends FixedTimeStepLoop {
     val world = new World(mainInput)
 
     val renderProgram = ShaderProgram.vertexFragmentProgram(
-        "src/main/glsl/shaders/vertexShader.glsl",
-        "src/main/glsl/shaders/fragmentShader.glsl")
+        "shaders/vertexShader.glsl",
+        "shaders/fragmentShader.glsl")
     glEnable(GL_CULL_FACE)
     glEnable(GL_BLEND)
     glEnable(GL_DEPTH_TEST)
