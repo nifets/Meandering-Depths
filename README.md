@@ -1,2 +1,2 @@
 # Meandering-Depths
-[!Screenshot](/res/md1.png?raw=true "Screenshot")
+[!Screenshot](/res/md1.png "Screenshot")
