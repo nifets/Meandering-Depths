@@ -31,8 +31,8 @@ import scala.math._
 import maths._
 
 class Terrain {
-    private val loadedChunks = HashMap[Vector3, Chunk]()
-    var lastCenterChunkPos = Vector3(-20f,0f,0f)
+    private val loadedChunks = HashMap[Vector3i, Chunk]()
+    var lastCenterChunkPos = Vector3i(-20,0,0)
 
     val noise = Array(new OpenSimplex2F(212123), new OpenSimplex2F(361222), new OpenSimplex2F(661222), new OpenSimplex2F(961222))
     val freq = Array(0.007, 0.019, 0.059, 0.12)
@@ -96,27 +96,28 @@ class Terrain {
         data.flip()
         data
     }*/
-    def genChunkInputData(p: Vector3): FloatBuffer = {
+    def genChunkInputData(p: Vector3i): FloatBuffer = {
+        val pos = (p * Chunk.SIZE).toVector3
         val data = MemoryUtil.memAllocFloat(4 * (Chunk.SIZE+ 1) * (Chunk.SIZE+ 1) * (Chunk.SIZE+ 1))
         val r = (0 until Chunk.SIZE + 1)
         for (i <- r; j <- r; k <- r) {
             data.put(0.3F). //RED
-                      put(0.3F + 0.3F*min(i, Chunk.SIZE - i).toFloat/ Chunk.SIZE). //GREEN
-                      put(0.3F + 0.4F*min(i, Chunk.SIZE - i).toFloat/ Chunk.SIZE). //BLUE
-                      put(isovalue((i + p.z*Chunk.SIZE).toDouble, (j + p.y*Chunk.SIZE).toDouble, (k + p.x*Chunk.SIZE).toDouble)) //ISOVALUE
+                 put(0.3F + 0.3F*min(i, Chunk.SIZE - i).toFloat/ Chunk.SIZE). //GREEN
+                 put(0.3F + 0.4F*min(i, Chunk.SIZE - i).toFloat/ Chunk.SIZE). //BLUE
+                 put(isovalue(i + pos.z, j + pos.y, k + pos.x)) //ISOVALUE
         }
         data.flip()
         data
     }
 
-    def noiseSampling(ps: Set[Vector3]) = {
+    def noiseSampling(ps: Set[Vector3i]) = {
         val list = for (p <- ps) yield Future {(p, genChunkInputData(p))}
         Future.sequence(list)
     }
 
     def update(pos: Vector3) = {
 
-        val centerChunkPos = Vector3((pos.x/Chunk.SIZE).floor, (pos.y/Chunk.SIZE).floor, (pos.z/Chunk.SIZE).floor)
+        val centerChunkPos = (pos / Chunk.SIZE).toVector3i
 
         if (centerChunkPos != lastCenterChunkPos) {
             val profiler2 = new Timer()
@@ -130,7 +131,7 @@ class Terrain {
 
             val s = Set(-2,-1,0,1,2)
             val newChunks = for (i <- s; j <- s; k <- s)
-                yield Vector3(i + centerChunkPos.x,j + centerChunkPos.y,k + centerChunkPos.z)
+                yield Vector3i(i + centerChunkPos.x,j + centerChunkPos.y,k + centerChunkPos.z)
 
             val oldChunks = loadedChunks.keySet
 
@@ -181,7 +182,7 @@ class Terrain {
 
     def getLoadedChunks = loadedChunks.values
 
-    private def isovalue(x: Double, y: Double, z: Double): Float = {
+    private def isovalue(x: Float, y: Float, z: Float): Float = {
         var res = -0.1F
         for (i <- 0 until 4)
             res += amp(i) * noise(i).noise3_XYBeforeZ(freq(i) * x, freqY(i) * y,freq(i) * z).toFloat

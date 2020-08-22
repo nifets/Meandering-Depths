@@ -23,9 +23,9 @@ import library._
 import library.Timer
 import maths._
 
-class Chunk(val pos: Vector3, inputData: FloatBuffer, computeShader: ComputeShaderProgram) extends Renderable {
+class Chunk(val pos: Vector3i, inputData: FloatBuffer, computeShader: ComputeShaderProgram) extends Renderable {
 
-    val offset = pos * Chunk.SIZE.toFloat
+    val offset = (pos * Chunk.SIZE).toVector3
     var textureLoad = 0D
     var compShader = 0D
     var vaoSetup = 0D

@@ -43,6 +43,8 @@ case class Vector3(x: Float, y: Float, z: Float) {
 
     def floor: Vector3 = Vector3(x.floor, y.floor, z.floor)
 
+    def toVector3i: Vector3i = Vector3i(x.floor.toInt, y.floor.toInt, z.floor.toInt)
+
     def xxx = Vector3(x, x, x)
     def xxy = Vector3(x, x, y)
     def xxz = Vector3(x, x, z)
