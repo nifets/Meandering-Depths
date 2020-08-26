@@ -2,6 +2,8 @@ package maths
 
 import scala.math._
 
+import scala.language.implicitConversions
+
 object Matrix4 {
     lazy val identity: Matrix4 = Matrix4(1f)
 
@@ -56,7 +58,7 @@ object Matrix4 {
                 v2.x, v2.y, v2.z, v2.w,
                 v3.x, v3.y, v3.z, v3.w)
 
-    implicit def floatToMatrix(f: Float): Matrix4 = Matrix4(f)
+    implicit def floatToMatrix4(f: Float): Matrix4 = Matrix4(f)
 }
 
 /** Column major 4x4 matrix with float entries*/
@@ -112,10 +114,10 @@ case class Matrix4( a00: Float, a01: Float, a02: Float, a03: Float,   //COLUMN 0
     def t = transpose
 
     def determinant: Float =
-        a00 * (a11 * a22 * a33 + a21 * a32 * a13 + a31 * a12 * a23 - a13 * a22 * a31 - a23 * a32 * a11 - a33 * a12 * a21)
-        - a10 * (a01 * a22 * a33 + a21 * a32 * a03 + a31 * a02 * a23 - a03 * a22 * a31 - a23 * a32 * a01 - a33 * a02 * a21)
-        + a20 * (a01 * a12 * a33 + a11 * a32 * a03 + a31 * a02 * a13 - a03 * a12 * a31 - a13 * a32 * a01 - a33 * a02 * a11)
-        - a30 * (a01 * a12 * a23 + a11 * a22 * a03 + a21 * a02 * a13 - a03 * a12 * a21 - a13 * a22 * a01 - a23 * a02 * a11)
+        a00 * (a11 * a22 * a33 + a21 * a32 * a13 + a31 * a12 * a23 - a13 * a22 * a31 - a23 * a32 * a11 - a33 * a12 * a21) -
+         a10 * (a01 * a22 * a33 + a21 * a32 * a03 + a31 * a02 * a23 - a03 * a22 * a31 - a23 * a32 * a01 - a33 * a02 * a21) +
+         a20 * (a01 * a12 * a33 + a11 * a32 * a03 + a31 * a02 * a13 - a03 * a12 * a31 - a13 * a32 * a01 - a33 * a02 * a11) -
+         a30 * (a01 * a12 * a23 + a11 * a22 * a03 + a21 * a02 * a13 - a03 * a12 * a21 - a13 * a22 * a01 - a23 * a02 * a11)
 
     def det = determinant
 
@@ -140,27 +142,27 @@ case class Matrix4( a00: Float, a01: Float, a02: Float, a03: Float,   //COLUMN 0
         val A0113 = a10 * a31 - a11 * a30
         val A0112 = a10 * a21 - a11 * a20
 
-        val det = 1 /(a00 * ( a11 * A2323 - a12 * A1323 + a13 * A1223 )
+        val dett = 1/(a00 * ( a11 * A2323 - a12 * A1323 + a13 * A1223 )
                     - a01 * ( a10 * A2323 - a12 * A0323 + a13 * A0223 )
                     + a02 * ( a10 * A1323 - a11 * A0323 + a13 * A0123 )
                     - a03 * ( a10 * A1223 - a11 * A0223 + a12 * A0123 ))
 
-        Matrix4(det *  ( a11 * A2323 - a12 * A1323 + a13 * A1223 ),
-                det * -( a01 * A2323 - a02 * A1323 + a03 * A1223 ),
-                det *  ( a01 * A2313 - a02 * A1313 + a03 * A1213 ),
-                det * -( a01 * A2312 - a02 * A1312 + a03 * A1212 ),
-                det * -( a10 * A2323 - a12 * A0323 + a13 * A0223 ),
-                det *  ( a00 * A2323 - a02 * A0323 + a03 * A0223 ),
-                det * -( a00 * A2313 - a02 * A0313 + a03 * A0213 ),
-                det *  ( a00 * A2312 - a02 * A0312 + a03 * A0212 ),
-                det *  ( a10 * A1323 - a11 * A0323 + a13 * A0123 ),
-                det * -( a00 * A1323 - a01 * A0323 + a03 * A0123 ),
-                det *  ( a00 * A1313 - a01 * A0313 + a03 * A0113 ),
-                det * -( a00 * A1312 - a01 * A0312 + a03 * A0112 ),
-                det * -( a10 * A1223 - a11 * A0223 + a12 * A0123 ),
-                det *  ( a00 * A1223 - a01 * A0223 + a02 * A0123 ),
-                det * -( a00 * A1213 - a01 * A0213 + a02 * A0113 ),
-                det *  ( a00 * A1212 - a01 * A0212 + a02 * A0112 )).t
+        Matrix4(dett *  ( a11 * A2323 - a12 * A1323 + a13 * A1223 ),
+                dett * -( a01 * A2323 - a02 * A1323 + a03 * A1223 ),
+                dett *  ( a01 * A2313 - a02 * A1313 + a03 * A1213 ),
+                dett * -( a01 * A2312 - a02 * A1312 + a03 * A1212 ),
+                dett * -( a10 * A2323 - a12 * A0323 + a13 * A0223 ),
+                dett *  ( a00 * A2323 - a02 * A0323 + a03 * A0223 ),
+                dett * -( a00 * A2313 - a02 * A0313 + a03 * A0213 ),
+                dett *  ( a00 * A2312 - a02 * A0312 + a03 * A0212 ),
+                dett *  ( a10 * A1323 - a11 * A0323 + a13 * A0123 ),
+                dett * -( a00 * A1323 - a01 * A0323 + a03 * A0123 ),
+                dett *  ( a00 * A1313 - a01 * A0313 + a03 * A0113 ),
+                dett * -( a00 * A1312 - a01 * A0312 + a03 * A0112 ),
+                dett * -( a10 * A1223 - a11 * A0223 + a12 * A0123 ),
+                dett *  ( a00 * A1223 - a01 * A0223 + a02 * A0123 ),
+                dett * -( a00 * A1213 - a01 * A0213 + a02 * A0113 ),
+                dett *  ( a00 * A1212 - a01 * A0212 + a02 * A0112 )).t
     }
 
     def inv: Matrix4 = inverse

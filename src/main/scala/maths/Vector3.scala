@@ -2,10 +2,15 @@ package maths
 
 import scala.math._
 
+import scala.language.implicitConversions
+
 object Vector3 {
+
+    def apply(f: Float): Vector3 = Vector3(f,f,f)
+
     //A bit dirty, but this is to allow operations such as f * vec
     //(in maths you tend to put constants before vectors)
-    implicit def floatToVector3(f: Float) = Vector3(f, f, f)
+    implicit def floatToVector3(f: Float): Vector3 = Vector3(f)
 }
 
 case class Vector3(x: Float, y: Float, z: Float) {

@@ -117,7 +117,7 @@ class Terrain {
 
     def update(pos: Vector3) = {
 
-        val centerChunkPos = (pos / Chunk.SIZE).toVector3i
+        val centerChunkPos = (pos / Chunk.SIZE.toFloat).toVector3i
 
         if (centerChunkPos != lastCenterChunkPos) {
             val profiler2 = new Timer()
@@ -180,12 +180,12 @@ class Terrain {
         lastCenterChunkPos = centerChunkPos
     }
 
-    def getLoadedChunks = loadedChunks.values
+    def getLoadedChunks: List[Chunk] = loadedChunks.values.toList
 
     private def isovalue(x: Float, y: Float, z: Float): Float = {
         var res = -0.1F
         for (i <- 0 until 4)
-            res += amp(i) * noise(i).noise3_XYBeforeZ(freq(i) * x, freqY(i) * y,freq(i) * z).toFloat
+            res += amp(i) * noise(i).noise3_XZBeforeY(freq(i) * x, freqY(i) * y,freq(i) * z).toFloat
         res
     }
 }

@@ -2,6 +2,7 @@
 in vec3 ourColour;
 in vec3 ourNormal;
 in vec3 fragPos;
+in float visibility;
 
 out vec4 color_out;
 
@@ -31,5 +32,5 @@ void main()
     float dist = length(light.position.xyz - fragPos);
 
     vec3 result = (ambient + (diffuse  * intensity * (1.5/(1.0f + 0.049*dist + 0.0032 * dist * dist)))) * ourColour;
-    color_out = vec4(result, 0.5);
+    color_out = mix(vec4(0.24,0.2,0.24,1),vec4(result, 1), visibility);
 }

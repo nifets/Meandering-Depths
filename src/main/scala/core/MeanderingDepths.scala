@@ -60,7 +60,7 @@ class MeanderingDepths extends FixedTimeStepLoop {
     glEnable(GL_CULL_FACE)
     glEnable(GL_BLEND)
     glEnable(GL_DEPTH_TEST)
-    glClearColor(0.9F, 0.1F, 0.1F, 0.0F)
+    glClearColor(0.24F, 0.2F, 0.24F, 0.0F)
     renderProgram.use()
     renderProgram.setUniform("projectionTransform", Matrix4.perspective(1.3F, 1366F/768, 0.1F, 300.0F))
     renderProgram.setUniform("light.cutOff", 45f.toRadians)
@@ -78,16 +78,19 @@ class MeanderingDepths extends FixedTimeStepLoop {
     }
 
     override def render(alpha: Double) = {
+        val a = alpha.toFloat
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         renderProgram.use()
-        renderProgram.setUniform("viewTransform", world.view(alpha.toFloat))
-        val pos = world.playerPosition
-        val lastPos = world.prevPlayerPosition
-        renderProgram.setUniform("light.position", lastPos.lerp(alpha.toFloat, pos))
-        renderProgram.setUniform("light.direction", world.front)
-        for (chunk <- world.getRenderables)
-            if (chunk != null)
-                chunk.render(renderProgram)
+        renderProgram.setUniform("viewTransform", world.view(a))
+
+        //hack -- will change later when implementing light system
+        val pos = world.player.position(a) + world.player.front(a) * 15f
+        renderProgram.setUniform("light.position", pos)
+        renderProgram.setUniform("light.direction", world.player.front(a))
+
+        for (r <- world.getRenderables)
+            r.render(a, renderProgram)
+
         window.updateScreen()
     }
 

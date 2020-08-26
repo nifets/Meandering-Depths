@@ -109,9 +109,8 @@ class Chunk(val pos: Vector3i, inputData: FloatBuffer, computeShader: ComputeSha
         (ssbo, vao, vCount)
     }
 
-    override def render(shader: ShaderProgram) = {
+    override def render(alpha: Float, shader: ShaderProgram) = {
         //println("RENDERING " + pos)
-        shader.use()
         glBindVertexArray(vao)
         shader.setUniform("worldTransform", worldTransform)
         //to change later
@@ -126,7 +125,7 @@ class Chunk(val pos: Vector3i, inputData: FloatBuffer, computeShader: ComputeSha
 }
 
 object Chunk {
-    val SIZE = 32
+    val SIZE = 24
     val GROUP_SIZE = 4
     val FLOATS_IN_TRIANGLE = 36
 }

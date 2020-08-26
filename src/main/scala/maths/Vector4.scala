@@ -2,6 +2,8 @@ package maths
 
 import scala.math._
 
+import scala.language.implicitConversions
+
 object Vector4 {
     def apply(v: Vector3, f: Float): Vector4 = Vector4(v.x,v.y,v.z,f)
     //A bit dirty, but this is to allow operations such as f * vec

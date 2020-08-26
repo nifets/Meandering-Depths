@@ -2,6 +2,8 @@ package maths
 
 import scala.math._
 
+import scala.language.implicitConversions
+
 object Vector3i {
     implicit def intToVector3i(i: Int): Vector3i = Vector3i(i,i,i)
 }

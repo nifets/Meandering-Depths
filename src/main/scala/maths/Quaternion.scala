@@ -2,13 +2,15 @@ package maths
 
 import scala.math._
 
+import scala.language.implicitConversions
+
 object Quaternion {
     /** Quaternion that represents a rotation of degree angle (in radians) about axis
     */
     def axisAngleRotation(axis: Vector3, angle: Float): Quaternion =
         Quaternion(cos(angle/2).toFloat, sin(angle/2).toFloat * axis)
 
-    /** Quaternion that represents a rotation in euler angles
+    /** Quaternion that represents a rotation in euler angles (counter clock wise) in order
     */
     def eulerRotation(xAngle: Float, yAngle: Float, zAngle: Float): Quaternion = {
         val cx = cos(xAngle/2).toFloat
@@ -28,7 +30,7 @@ object Quaternion {
     def apply(s: Float, v: Vector3): Quaternion = Quaternion(s, v.x, v.y, v.z)
     implicit def floatToQuaternion(s: Float) = Quaternion(s, 0f, 0f, 0f)
     implicit def vector3ToQuaternion(v: Vector3) = Quaternion(0f, v)
-    implicit def quaternionToVector3(q: Quaternion) = q.vector
+    implicit def quaternionToVector3(q: Quaternion) = q.vector3
 }
 
 /** Quaternion for rotations and orientation
@@ -49,7 +51,7 @@ case class Quaternion(s: Float, x: Float, y: Float, z: Float) {
                     s * q.y - x * q.z + y * q.s + z * q.x,
                     s * q.z + x * q.y - y * q.x + z * q.s)
 
-    def vector: Vector3 = Vector3(x, y, z)
+    def vector3: Vector3 = Vector3(x, y, z)
 
     def conj: Quaternion = Quaternion(s, -x, -y, -z)
 
@@ -62,4 +64,10 @@ case class Quaternion(s: Float, x: Float, y: Float, z: Float) {
     def inverse: Quaternion = conj / (s*s + x*x + y*y + z*z)
 
     def inv: Quaternion = inverse
+
+    def lerp(alpha: Float, q: Quaternion): Quaternion =
+        Quaternion(Maths.lerp(s,q.s,alpha),
+                   Maths.lerp(x,q.x,alpha),
+                   Maths.lerp(y,q.y,alpha),
+                   Maths.lerp(z,q.z,alpha))
 }

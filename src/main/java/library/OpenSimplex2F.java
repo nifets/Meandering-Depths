@@ -11,6 +11,7 @@ package library;
  * Multiple versions of each function are provided. See the
  * documentation above each, for more info.
  */
+
 public class OpenSimplex2F {
 
 	private static final int PSIZE = 2048;
