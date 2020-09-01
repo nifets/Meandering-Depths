@@ -31,6 +31,6 @@ void main()
 
     float dist = length(light.position.xyz - fragPos);
 
-    vec3 result = (ambient + (diffuse  * intensity * (1.5/(1.0f + 0.049*dist + 0.0032 * dist * dist)))) * ourColour;
-    color_out = mix(vec4(0.24,0.2,0.24,1),vec4(result, 1), visibility);
+    vec3 result = (ambient + + diffuse * 0.2 + (diffuse  * (-0.2 + intensity * (1.5/(1.0f + 0.049*dist + 0.0032 * dist * dist))))) * ourColour;
+    color_out = mix(vec4(0.34,0.1,0.64,1),vec4(result, 1), visibility);
 }

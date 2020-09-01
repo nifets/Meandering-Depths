@@ -21,17 +21,17 @@ lazy val root = (project in file("."))
 		// It depends on LGPL code
 		"org.scalanlp" %% "breeze-viz" % "1.0",
 
-		"org.lwjgl" % "lwjgl" % "3.2.2",
+		"org.lwjgl" % "lwjgl" % "3.2.3",
 
-		"org.lwjgl" % "lwjgl" % "3.2.2" classifier s"natives-windows",
+		"org.lwjgl" % "lwjgl" % "3.2.3" classifier s"natives-windows",
 
-		"org.lwjgl" % "lwjgl-opengl" % "3.2.2",
+		"org.lwjgl" % "lwjgl-opengl" % "3.2.3",
 
-		"org.lwjgl" % "lwjgl-opengl" % "3.2.2" classifier s"natives-windows",
+		"org.lwjgl" % "lwjgl-opengl" % "3.2.3" classifier s"natives-windows",
 
-		"org.lwjgl" % "lwjgl-glfw" % "3.2.2",
+		"org.lwjgl" % "lwjgl-glfw" % "3.2.3",
 
-		"org.lwjgl" % "lwjgl-glfw" % "3.2.2" classifier s"natives-windows",
+		"org.lwjgl" % "lwjgl-glfw" % "3.2.3" classifier s"natives-windows",
 
         "org.scalactic" %% "scalactic" % "3.1.2",
 

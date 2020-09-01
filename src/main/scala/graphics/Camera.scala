@@ -48,12 +48,21 @@ class Camera(player: Player, gameInput: InputContext) {
             yawAngle = -160.0F
     }
 
-    /** Get the view matrix at the time of rendering, by intepolating between the last 2 update states */
+    //bugged, will fix later
+    /**
+    // Get the view matrix at the time of rendering, by intepolating between the last 2 update states
     def viewMatrix(alpha: Float): Matrix4 =
         (Matrix4.translation(-defaultPos * distance) //translate the space to move the camera behind the player
         * Matrix4.rotation(orientation(alpha)) //rotate the space to get view from camera
         * player.orientationMatrix(alpha).t //rotate the space to align axes to the local player ones
         * Matrix4.translation(-player.position(alpha))) //translate the space so that player is at origin
+    */
+
+    def viewMatrix(alpha: Float): Matrix4 =
+        (Matrix4.translation(-defaultPos * distance) //translate the space to move the camera behind the player
+        * Matrix4.rotation(currOrientation) //rotate the space to get view from camera
+        * player.orientationMatrix(alpha).t //rotate the space to align axes to the local player ones
+        * Matrix4.translation(-player.currPosition)) //translate the space so that player is at origin
 
     def update(): Unit = {
         //if player is moving, camera is locked: yawing will instead cause the rotation of player's moving direction, pitching stays the same

@@ -1,13 +1,45 @@
 #version 430 core
 //MARCHING CUBES COMPUTE SHADER
+//Given a sequence of cubic chunks and the isovalue data at each voxel, the shader returns the isosurface at value 0 as an array of triangle data (vertex position, colour and normal) for each chunk.
 
 #define eps 0.000001
+#define CHUNK_SIZE 28
+#define MAX_CHUNKS_PER_COMPUTE 30
+#define MAX_TRIANGLES_PER_CUBE 5
 
-#define CHUNK_SIZE = gl_NumWorkGroups * gl_WorkGroupSize.x * gl_WorkGroupSize.y * gl_WorkGroupSize.z
 
-layout(local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
+            /*      .2------3          .*--2---*
+                  .' |    .'|        .11|    10|
+                 6---+--7'  |       *-6-+--*'  1
+                 |   y  |   |       |   3  |   |
+                 |  ,0-x+---1       7  ,*--+-0-*
+                 |.z    | .'        |.8    5 .9
+                 4------5'          *--4---*'                                     */
 
-layout(rgba32f, binding = 0) readonly uniform image3D inputImg; //INPUT: 3D DENSITY FIELD
+//AUXILIARY LOOK-UP TABLES AND SOME OTHER USEFUL INFO
+layout(std430, binding = 0) readonly buffer Smctable {
+    int MCTable[256][16];
+    int edgePoints[12][2];
+    int fixCorners[8];
+};
+
+//For some reason, the limit of the group size is really low, so one local group represents only a vertical slice of a cubic chunk.
+//number of work groups: x - number of chunks, y - 1, z - CHUNK_SIZE
+
+layout(local_size_x = CHUNK_SIZE, local_size_y = CHUNK_SIZE, local_size_z = 1) in;
+
+//INPUT: stores the location in the world of each chunk
+layout(std430, binding = 1) readonly buffer SChunkPos {
+    ivec4 chunkPos[MAX_CHUNKS_PER_COMPUTE];
+};
+
+//INPUT: colour and isovalue data
+layout(std430, binding = 2) readonly buffer Sinput {
+    vec4 inputData[MAX_CHUNKS_PER_COMPUTE][CHUNK_SIZE+1][CHUNK_SIZE+1][CHUNK_SIZE+1];
+};
+
+
+
 
 struct Vertex {             //12 floats
     vec3 position;
@@ -22,28 +54,30 @@ struct Triangle {           //36 floats
     Vertex vertex[3];
 };
 
-layout(std430, binding = 1) coherent restrict writeonly buffer Soutput { //OUTPUT: SEQUENCE OF TRIANGLES
+
+//OUTPUT: vertex data for each chunk
+layout(std430, binding = 3) restrict writeonly buffer Smesh {
     Triangle mesh[];
 };
 
-layout(binding = 2) uniform atomic_uint numberOfTriangles; //ATOMIC COUNTER OF NUMBER OF TRIANGLES
-
-layout(std430, binding = 3) buffer Smctable { //AUXILIARY LOOK-UP TABLES
-    int MCTable[256][16];
-    int edgePoints[12][2];
-    int fixCorners[8];
+//OUTPUT: number of triangles per chunk
+layout(std430, binding = 4) restrict writeonly buffer Svcount {
+    int vertexCount[MAX_CHUNKS_PER_COMPUTE];
 };
 
-        /*      .2------3          .*--2---*
-              .' |    .'|        .11|    10|
-             6---+--7'  |       *-6-+--*'  1
-             |   y  |   |       |   3  |   |
-             |  ,0-x+---1       7  ,*--+-0-*
-             |.z    | .'        |.8    5 .9
-             4------5'          *--4---*'                                     */
 
 
 
+
+//Returns the colours and isovalue at the vertex position in the given chunk
+vec4 getDataAt(uint chunkIndex, ivec3 vertexPosition) {
+    return inputData[chunkIndex][vertexPosition.z][vertexPosition.y][vertexPosition.x];
+}
+
+void addTriangleToMesh(uint chunkIndex, Triangle triangle) {
+    uint dataIndex = atomicAdd(vertexCount[chunkIndex], 1);
+    mesh[chunkIndex * CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * MAX_TRIANGLES_PER_CUBE + dataIndex] = triangle;
+}
 
 //Returns the index of the polygonisation of a given cube (based on density of its corners)
 int cubeIndex(float corners[8]) {
@@ -53,7 +87,7 @@ int cubeIndex(float corners[8]) {
     int index = 0;
     int power = 1; //2^i
     for (int i = 0; i < 8; i++) {
-        if (fixedCorners[i] > eps)
+        if (fixedCorners[i] > 0)
             index += power;         //(+= 2^i)
         power *= 2;
     }
@@ -87,21 +121,27 @@ vec3 triangleNormal(vec3 vertex0, vec3 vertex1, vec3 vertex2) {
 
 void main() {
 
-    ivec3 cubeCoords = ivec3(gl_GlobalInvocationID.x,gl_GlobalInvocationID.y,gl_GlobalInvocationID.z);
-    //ivec3 cubeCoords = gl_GlobalInvocationID;
+    const uint currentChunkIndex = gl_WorkGroupID.x;
+    const ivec3 currentChunkPos = chunkPos[currentChunkIndex].xyz;
+
+    //The coordinates of the current cube within the current chunk
+    const ivec3 cubeCoords = ivec3(gl_LocalInvocationID.xy, gl_WorkGroupID.z);
+
     float density[8];
     vec3 colour[8];
     for (int i = 0; i < 8; i++) {
         ivec3 offset = intToBits(i);
-        vec4 rawData = imageLoad(inputImg, cubeCoords + offset);
+        vec4 rawData = getDataAt(currentChunkIndex, cubeCoords + offset);
         density[i] = rawData.w;
         colour[i] = rawData.xyz;
     }
 
     const int index = cubeIndex(density);
 
-    //MESH
+
+    //MESH OF A CUBE
     for (int i = 0; i < 5 && MCTable[index][3*i] != -1; i++) {
+
         //TRIANGLE i
         Triangle triangle;
         for (int j = 0; j < 3; j++) {
@@ -124,25 +164,25 @@ void main() {
 
             //SET TRIANGLE VERTICES POSITION
             triangle.vertex[j].position = vec3Interpolation(vertex0coords , vertex1coords, alpha);
+
             //SET TRIANGLE VERTEX COLOUR
             triangle.vertex[j].colour = vec3Interpolation(colour[vertex0], colour[vertex1], alpha);
             //might be better to have all the vertices have the same colour
 
+            //wil change later to avoid the ugly padding
             triangle.vertex[j].padding1 = 1.0;
             triangle.vertex[j].padding2 = 1.0;
             triangle.vertex[j].padding3 = 1.0;
         }
 
-        //SET TRIANGLE NORMAL
+        //SET TRIANGLE NORMAL --- FLAT SHADING
+
         vec3 normal = triangleNormal(triangle.vertex[0].position, triangle.vertex[1].position, triangle.vertex[2].position);
-        //vec3 colour = triangle.vertex[0].colour + triangle.vertex[1].colour + triangle.vertex[2].colour;
-        for (int j = 0; j < 3; j++) {
+        for (int j = 0; j < 3; j++)
             triangle.vertex[j].normal = normal;
-            //triangle.vertex[j].colour = colour;
-        }
+
+
         //WRITE TRIANGLE TO OUTPUT
-        uint dataIndex = atomicCounterIncrement(numberOfTriangles);
-        mesh[dataIndex] = triangle;
+        addTriangleToMesh(currentChunkIndex, triangle);
     }
-    barrier();
 }

@@ -19,10 +19,11 @@ case class Vector3i(x: Int, y: Int, z: Int) {
 
     def dot(v: Vector3i): Int = x * v.x + y * v.y + z * v.z
 
-    def normSquared = this dot this
+    def normSquared: Float = (this dot this).toFloat
     def norm: Float = sqrt(normSquared).toFloat
 
     def distanceTo(v: Vector3i): Float = (this - v).norm
+    def squaredDistanceTo(v: Vector3i): Float = (this - v).normSquared
 
     def toVector3: Vector3 = Vector3(x.toFloat, y.toFloat, z.toFloat)
 

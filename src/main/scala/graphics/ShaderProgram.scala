@@ -101,9 +101,13 @@ object ShaderProgram {
 
     def computeProgram(computePath: String): ComputeShaderProgram = {
         val program = new ComputeShaderProgram()
+
         val computeShader = Shader(GL_COMPUTE_SHADER, computePath)
+        println("compute program: created compute shader")
         program.attachShader(computeShader)
+        println("attached shader to program")
         program.link()
+        println("linked program")
         computeShader.delete()
 
         program

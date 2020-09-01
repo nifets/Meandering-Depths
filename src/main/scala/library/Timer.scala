@@ -11,23 +11,23 @@ class Timer {
 
 
     //Must call this method to use the timer
-    def start() = {
+    def start(): Unit = {
         require(GLFW.isRunning)
         startTime = glfwGetTime()
         isRunning = true
     }
 
-    def getTime() = {
+    def getTime(): Double = {
         if(isRunning)
             glfwGetTime() - startTime
         else
             -1D
     }
 
-    def getLowPrecisionTime() = ((getTime() * 1000).toInt).toDouble / 1000
+    def getLowPrecisionTime(): Double = ((getTime() * 1000).toInt).toDouble / 1000
 
     /** Returns the time elapsed since the last getDelta call for this timer object*/
-    def getDelta() = {
+    def getDelta(): Double = {
         var currentTime = getTime()
         val delta = currentTime - lastTime
         lastTime = currentTime

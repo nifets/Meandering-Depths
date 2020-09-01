@@ -26,7 +26,7 @@ import scala.math._
 import maths._
 
 class MeanderingDepths extends FixedTimeStepLoop {
-    private val window = Window.create(1366, 768, "Meandering Depths")
+    private val window = Window.create(1920, 1080, "Meandering Depths")
     private val mainInput = InputHandler.createContext(window, new InputMapping {
         override def getEventsfromInput(input: RawInput): Set[InputEvent] = {
             input match {
@@ -60,9 +60,9 @@ class MeanderingDepths extends FixedTimeStepLoop {
     glEnable(GL_CULL_FACE)
     glEnable(GL_BLEND)
     glEnable(GL_DEPTH_TEST)
-    glClearColor(0.24F, 0.2F, 0.24F, 0.0F)
+    glClearColor(0.34F, 0.1F, 0.64F, 0.0F)
     renderProgram.use()
-    renderProgram.setUniform("projectionTransform", Matrix4.perspective(1.3F, 1366F/768, 0.1F, 300.0F))
+    renderProgram.setUniform("projectionTransform", Matrix4.perspective(1.3F, 1920F/1080, 0.1F, 300.0F))
     renderProgram.setUniform("light.cutOff", 45f.toRadians)
     renderProgram.setUniform("light.outerCutOff", 65.5f.toRadians)
 
@@ -74,7 +74,7 @@ class MeanderingDepths extends FixedTimeStepLoop {
     }
 
     override def update(dt: Double) = {
-        world.update()
+        world.update(dt)
     }
 
     override def render(alpha: Double) = {
@@ -90,7 +90,6 @@ class MeanderingDepths extends FixedTimeStepLoop {
 
         for (r <- world.getRenderables)
             r.render(a, renderProgram)
-
         window.updateScreen()
     }
 

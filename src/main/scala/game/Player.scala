@@ -55,14 +55,14 @@ class Player(gameInput: InputContext) extends Renderable {
 
     //simple cube mesh for now, will replace with something more complex later on
     val meshVao = {
-        val vertices = Array(-2f,-3f,-2f, 20f, 0.2f, 0.7f, 0f, 20f, -2f,-3f,-2f,20f,
-                              2f,-3f,-2f, 20f, 0.2f, 0.7f, 0f, 20f,  2f,-3f,-2f,20f,
-                             -2f, 3f,-2f, 20f, 0.2f, 0.7f, 0f, 20f, -2f, 3f,-2f,20f,
-                              2f, 3f,-2f, 20f, 0.2f, 0.7f, 0f, 20f,  2f, 3f, 2f,20f,
-                             -2f,-3f, 2f, 20f, 1f, 1f, 1f, 20f, -2f,-3f, 2f,20f,
-                              2f,-3f, 2f, 20f, 1f, 1f, 1f, 20f,  2f,-3f, 2f,20f,
-                              -2f, 3f, 2f, 20f, 1f, 1f, 1f, 20f,-2f, 3f, 2f,20f,
-                               2f, 3f, 2f, 20f, 1f, 1f, 1f, 20f, 2f, 3f, 2f,20f)
+        val vertices = Array(-2f,-3f,-2f, 20f, 1f, 1f, 1f, 0.7f, -2f,-3f,-2f,20f,
+                              2f,-3f,-2f, 20f, 1f, 1f, 1f, 0.7f,  2f,-3f,-2f,20f,
+                             -2f, 3f,-2f, 20f, 1f, 1f, 1f, 0.7f, -2f, 3f,-2f,20f,
+                              2f, 3f,-2f, 20f, 1f, 1f, 1f, 0.7f,  2f, 3f, 2f,20f,
+                             -2f,-3f, 2f, 20f, 0.2f, 0.6f, 0.7f, 20f, -2f,-3f, 2f,20f,
+                              2f,-3f, 2f, 20f, 0.2f, 0.6f, 0.7f, 20f,  2f,-3f, 2f,20f,
+                             -2f, 3f, 2f, 20f, 0.2f, 0.6f, 0.7f, 20f, -2f, 3f, 2f,20f,
+                              2f, 3f, 2f, 20f, 0.2f, 0.6f, 0.7f, 20f,  2f, 3f, 2f,20f)
 
         val indices = Array(0,2,1, 1,2,3, 0,4,2, 2,4,6, 0,1,4, 1,5,4,
                             2,6,3, 3,6,7, 3,7,1, 1,7,5, 7,4,5, 7,6,4)
@@ -111,10 +111,14 @@ class Player(gameInput: InputContext) extends Renderable {
         glDrawElements(GL_TRIANGLES, vertexCount, GL_UNSIGNED_INT, 0)
     }
 
+    //bugged, will fix later
     //rotate player based on orientation then translate to current position
-    def worldTransform(alpha: Float): Matrix4 = Matrix4.translation(position(alpha)) * orientationMatrix(alpha) * Matrix4.scaling(2f,2f,2f)
+    //def worldTransform(alpha: Float): Matrix4 = Matrix4.translation(position(alpha)) * orientationMatrix(alpha) * Matrix4.scaling(2f,2f,2f)
+    def worldTransform(alpha: Float): Matrix4 = Matrix4.translation(currPosition) * orientationMatrix(alpha) * Matrix4.scaling(2f,2f,2f)
 
-    def orientationMatrix(alpha: Float): Matrix4 = Matrix3(right(alpha), worldUp, -front(alpha)).expand
+    //bugged, will fix later
+    //def orientationMatrix(alpha: Float): Matrix4 = Matrix3(right(alpha), worldUp, -front(alpha)).expand
+    def orientationMatrix(alpha: Float): Matrix4 = Matrix3(currRight, worldUp, -currFront).expand
 
     def update() = {
         lastPosition = currPosition

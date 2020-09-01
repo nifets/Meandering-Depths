@@ -13,8 +13,8 @@ uniform mat4 viewTransform;
 uniform mat4 worldTransform;
 uniform mat4 normalTransform;
 
-const float density = 0.015;
-const float gradient = 4.5;
+const float density = 0.0125;
+const float gradient = 5.5;
 
 void main()
 {

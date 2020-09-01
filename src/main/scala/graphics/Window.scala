@@ -49,12 +49,13 @@ class Window private(width: Int, height: Int, title: String) {
     private def setCallbacks() = InputHandler.setWindowCallbacks(this, id)
 
     private def genGLFWwindowID(): Long = {
+        glfwWindowHint(GLFW_FOCUSED, GLFW_TRUE)
         val id = glfwCreateWindow(width, height, title, NULL, NULL)
         if (id == NULL) {
           GLFW.quit()
           throw new RuntimeException("Failed to create the GLFW window!")
         }
-
+        glfwSetWindowPos(id, 0, 0);
         id
     }
 
