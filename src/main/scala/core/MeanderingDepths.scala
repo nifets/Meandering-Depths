@@ -43,6 +43,8 @@ class MeanderingDepths extends FixedTimeStepLoop {
                 case(Key(GLFW_KEY_LEFT_SHIFT, GLFW_PRESS)) => Set(InputEvent("MOVE_DOWN", 1F))
                 case(Key(GLFW_KEY_LEFT_SHIFT, GLFW_RELEASE)) => Set(InputEvent("MOVE_DOWN", 0F))
                 case(Key(GLFW_KEY_ESCAPE, GLFW_RELEASE)) => Set(InputEvent("EXIT_APPLICATION", 1F))
+                case(Key(GLFW_KEY_P, GLFW_PRESS)) => Set(InputEvent("DESTROY", 1F))
+                case(Key(GLFW_KEY_P, GLFW_RELEASE)) => Set(InputEvent("DESTROY", 0F))
                 case (MouseCursorPos(xpos, ypos)) =>
                                     Set(InputEvent("PITCH_VIEW", ypos), InputEvent("YAW_VIEW", xpos))
                 case _ => Set[InputEvent]()
@@ -55,16 +57,36 @@ class MeanderingDepths extends FixedTimeStepLoop {
     val world = new World(mainInput)
 
     val renderProgram = ShaderProgram.vertexFragmentProgram(
-        "shaders/vertexShader.glsl",
+        "shaders/staticVertexShader.glsl",
         "shaders/fragmentShader.glsl")
+
+    val animationRenderProgram = ShaderProgram.vertexFragmentProgram(
+        "shaders/animatedVertexShader.glsl",
+        "shaders/fragmentShader.glsl")
+
+
     glEnable(GL_CULL_FACE)
     glEnable(GL_BLEND)
     glEnable(GL_DEPTH_TEST)
-    glClearColor(0.34F, 0.1F, 0.64F, 0.0F)
+
+    val skyColour = Vector3(0.034f, 0.21f, 0.264f)
+
+    val playerLight = new PointLight(Vector3(0f), 1f, 0.14f, 0.007f, Vector3(1f))
+
+
+    glClearColor(skyColour.x, skyColour.y, skyColour.z, 1.0f)
+
     renderProgram.use()
     renderProgram.setUniform("projectionTransform", Matrix4.perspective(1.3F, 1920F/1080, 0.1F, 300.0F))
-    renderProgram.setUniform("light.cutOff", 45f.toRadians)
-    renderProgram.setUniform("light.outerCutOff", 65.5f.toRadians)
+    renderProgram.setUniform("skyColour", skyColour)
+    renderProgram.setUniform("numOfPointLights", 1)
+    renderProgram.setUniform("materials", Terrain.materials)
+
+    animationRenderProgram.use()
+    animationRenderProgram.setUniform("projectionTransform", Matrix4.perspective(1.3F, 1920F/1080, 0.1F, 300.0F))
+    animationRenderProgram.setUniform("skyColour", skyColour)
+    animationRenderProgram.setUniform("numOfPointLights", 1)
+    animationRenderProgram.setUniform("materials", Terrain.materials)
 
     loop()
     dispose()
@@ -82,12 +104,16 @@ class MeanderingDepths extends FixedTimeStepLoop {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         renderProgram.use()
         renderProgram.setUniform("viewTransform", world.view(a))
+        renderProgram.setUniform("cameraPos", -world.view(a) * Vector4(0f, 0f, 0f, 1f))
+        animationRenderProgram.setUniform("viewTransform", world.view(a))
+        animationRenderProgram.setUniform("cameraPos", -world.view(a) * Vector4(0f, 0f, 0f, 1f))
 
-        //hack -- will change later when implementing light system
-        val pos = world.player.position(a) + world.player.front(a) * 15f
-        renderProgram.setUniform("light.position", pos)
-        renderProgram.setUniform("light.direction", world.player.front(a))
+        playerLight.position = world.player.position(a) + world.player.front(a) * 2 + Vector3(0f,1f,0f) * 3
 
+        renderProgram.setUniform("pointLights[0]", playerLight)
+        animationRenderProgram.setUniform("pointLights[0]", playerLight)
+
+        world.player.render(a, animationRenderProgram)
         for (r <- world.getRenderables)
             r.render(a, renderProgram)
         window.updateScreen()

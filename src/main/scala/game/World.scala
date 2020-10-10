@@ -16,11 +16,13 @@ class World(gameInput: InputContext) {
 
     def update(dt: Double) = {
         currentTime += dt
-        player.update()
-        camera.update()
+        if (!terrain.getLoadedChunks.isEmpty) {
+            player.update(terrain.terrainCollisionMesh, dt)
+            camera.update(terrain.terrainCollisionMesh, terrain)
+        }
         terrain.update(player.currPosition, dt)
     }
 
-    def getRenderables: List[Renderable] = List(player) ++ terrain.getLoadedChunks
+    def getRenderables: List[Renderable] = terrain.getLoadedChunks
 
 }

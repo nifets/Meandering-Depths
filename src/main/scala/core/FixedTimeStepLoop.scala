@@ -4,7 +4,7 @@ import library.GLFW
 import library._
 
 trait FixedTimeStepLoop {
-    val TARGET_TPS = 32
+    val TARGET_TPS = 30
     private var isRunning = false
 
     GLFW.init()

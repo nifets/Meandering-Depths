@@ -34,3 +34,20 @@ class Timer {
         delta
     }
 }
+
+object Timer {
+    def getTime: Double = {
+        require(GLFW.isRunning)
+        glfwGetTime()
+    }
+    def getLowPrecisionTime: Double = ((Timer.getTime * 1000).toInt).toDouble / 1000
+
+    def profile[T](label: String)(block: => T): T = {
+        val t0 = Timer.getTime
+        val result = block
+        val t1 = Timer.getTime
+        println(label + " elapsed time: " + (t1 - t0) + " seconds")
+        result
+    }
+
+}

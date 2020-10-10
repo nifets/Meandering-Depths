@@ -13,7 +13,7 @@ case class Vector3i(x: Int, y: Int, z: Int) {
     def +(v: Vector3i): Vector3i = Vector3i(x + v.x, y + v.y, z + v.z)
     def -(v: Vector3i): Vector3i = Vector3i(x - v.x, y - v.y, z - v.z)
     def *(i: Int): Vector3i = Vector3i(i*x, i*y, i*z)
-
+    def /(i: Int): Vector3i = Vector3i(x/i, y/i, z/i)
     //element wise multiplication
     def *(v: Vector3i): Vector3i = Vector3i(x * v.x, y * v.y, z * v.z)
 

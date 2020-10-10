@@ -22,8 +22,9 @@ import graphics._
 import library._
 import library.Timer
 import maths._
+import physics._
 
-class Chunk(val pos: Vector3i, vbo: Int, val vertexCount: Int) extends Renderable {
+class Chunk(val pos: Vector3i, vbo: Int, val vertexCount: Int, val collisionBox: ChunkCollisionMesh) extends Renderable {
 
     val offset = (pos * Chunk.SIZE).toVector3
     val worldTransform = Matrix4.translation(offset)
@@ -35,22 +36,24 @@ class Chunk(val pos: Vector3i, vbo: Int, val vertexCount: Int) extends Renderabl
     glBindBuffer(GL_ARRAY_BUFFER, vbo)
 
     //vertex positions attribute
-    glVertexAttribPointer(0, 4, GL_FLOAT, false, 12*4, 0)
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, 8*4, 0)
     glEnableVertexAttribArray(0)
-    //vertex colour attribute
-    glVertexAttribPointer(1, 4, GL_FLOAT, false, 12*4, 4*4)
+    //vertex material id attribute
+    glVertexAttribPointer(1, 1, GL_FLOAT, false, 8*4, 3*4)
     glEnableVertexAttribArray(1)
     //vertex normal attribute
-    glVertexAttribPointer(2, 4, GL_FLOAT, false, 12*4, 8*4)
+    glVertexAttribPointer(2, 3, GL_FLOAT, false, 8*4, 4*4)
     glEnableVertexAttribArray(2)
+    //vertex colour variation attribute
+    glVertexAttribPointer(3, 1, GL_FLOAT, false, 8*4, 7*4)
+    glEnableVertexAttribArray(3)
 
     //println(vertexCount)
 
     override def render(alpha: Float, shader: ShaderProgram) = {
         glBindVertexArray(vao)
         shader.setUniform("worldTransform", worldTransform)
-        //to change later
-        shader.setUniform("normalTransform", worldTransform)
+        shader.setUniform("normalTransform", normalTransform.inv.t)
         glDrawArrays(GL_TRIANGLES, 0, vertexCount)
     }
 
@@ -61,6 +64,6 @@ class Chunk(val pos: Vector3i, vbo: Int, val vertexCount: Int) extends Renderabl
 }
 
 object Chunk {
-    val SIZE = 28
-    val FLOATS_IN_TRIANGLE = 36
+    val SIZE = 20
+    val FLOATS_IN_TRIANGLE = 24
 }

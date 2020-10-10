@@ -1,8 +1,8 @@
 package maths
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite._
 
-class Vector3test extends FunSuite {
+class Vector3test extends AnyFunSuite {
     test("dot product") {
         val v = Vector3(0f,-1f,2.5f)
         assert((v dot v) === 7.25f)

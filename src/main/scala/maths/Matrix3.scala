@@ -90,7 +90,7 @@ case class Matrix3( a00: Float, a01: Float, a02: Float,   //COLUMN 0
         val dett = 1/det
         (dett * Matrix3(a11*a22 - a21*a12, a02*a21 - a01*a22, a01*a12 - a02*a11,
                         a12*a20 - a10*a22, a00*a22 - a02*a20, a10*a02 - a00*a11,
-                        a10*a21 - a20*a11, a20*a01 - a00*a21, a00*a11 - a10*a01)).t
+                        a10*a21 - a20*a11, a20*a01 - a00*a21, a00*a11 - a10*a01))
     }
 
     def inv: Matrix3 = inverse

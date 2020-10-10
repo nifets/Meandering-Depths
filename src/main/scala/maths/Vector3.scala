@@ -19,7 +19,7 @@ case class Vector3(x: Float, y: Float, z: Float) {
     def +(v: Vector3): Vector3 = Vector3(x + v.x, y + v.y, z + v.z)
     def -(v: Vector3): Vector3 = Vector3(x - v.x, y - v.y, z - v.z)
     def *(f: Float): Vector3 = Vector3(f*x, f*y, f*z)
-    def /(f: Float): Vector3 = Vector3(x/f,y/f,z/f)
+    def /(f: Float): Vector3 = this * (1f/f)
 
     //element wise multiplication
     def *(v: Vector3): Vector3 = Vector3(x * v.x, y * v.y, z * v.z)
@@ -27,7 +27,7 @@ case class Vector3(x: Float, y: Float, z: Float) {
     def cross(v: Vector3): Vector3 =
         Vector3(y * v.z - z * v.y,
                 z * v.x - x * v.z,
-                x * v.y - y * v.z)
+                x * v.y - y * v.x)
 
     def dot(v: Vector3): Float = x * v.x + y * v.y + z * v.z
 

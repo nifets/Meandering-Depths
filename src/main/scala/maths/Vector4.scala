@@ -17,7 +17,7 @@ case class Vector4(x: Float, y: Float, z: Float, w: Float) {
     def +(v: Vector4): Vector4 = Vector4(x + v.x, y + v.y, z + v.z, w + v.w)
     def -(v: Vector4): Vector4 = Vector4(x - v.x, y - v.y, z - v.z, w - v.w)
     def *(f: Float): Vector4 = Vector4(f*x, f*y, f*z, f*w)
-    def /(f: Float): Vector4 = Vector4(x/f,y/f,z/f, w/f)
+    def /(f: Float): Vector4 = this * (1f/f)
 
     // Element-wise multiplication
     def *(v: Vector4): Vector4 = Vector4(x * v.x, y * v.y, z * v.z, w * v.w)

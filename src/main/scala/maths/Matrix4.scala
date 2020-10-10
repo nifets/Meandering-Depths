@@ -4,6 +4,9 @@ import scala.math._
 
 import scala.language.implicitConversions
 
+import org.lwjgl.assimp.AIMatrix4x4
+import org.lwjgl.assimp._
+
 object Matrix4 {
     lazy val identity: Matrix4 = Matrix4(1f)
 
@@ -16,6 +19,8 @@ object Matrix4 {
     def diag(v: Vector4): Matrix4 = diag(v.x,v.y,v.z,v.w)
 
     def scaling(x: Float, y: Float, z: Float): Matrix4 = diag(x,y,z,1f)
+
+    def scaling(v: Vector3): Matrix4 = scaling(v.x, v.y, v.z)
 
     def translation(x: Float, y: Float, z: Float): Matrix4 = Matrix4(1f, 0f, 0f, 0f,
                                                                      0f, 1f, 0f, 0f,
@@ -59,6 +64,12 @@ object Matrix4 {
                 v3.x, v3.y, v3.z, v3.w)
 
     implicit def floatToMatrix4(f: Float): Matrix4 = Matrix4(f)
+
+    def fromAssimp(m: AIMatrix4x4): Matrix4 =
+        Matrix4(m.a1, m.b1, m.c1, m.d1,
+                m.a2, m.b2, m.c2, m.d2,
+                m.a3, m.b3, m.c3, m.d3,
+                m.a4, m.b4, m.c4, m.d4)
 }
 
 /** Column major 4x4 matrix with float entries*/
@@ -162,7 +173,7 @@ case class Matrix4( a00: Float, a01: Float, a02: Float, a03: Float,   //COLUMN 0
                 dett * -( a10 * A1223 - a11 * A0223 + a12 * A0123 ),
                 dett *  ( a00 * A1223 - a01 * A0223 + a02 * A0123 ),
                 dett * -( a00 * A1213 - a01 * A0213 + a02 * A0113 ),
-                dett *  ( a00 * A1212 - a01 * A0212 + a02 * A0112 )).t
+                dett *  ( a00 * A1212 - a01 * A0212 + a02 * A0112 ))
     }
 
     def inv: Matrix4 = inverse

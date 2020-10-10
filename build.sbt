@@ -33,6 +33,10 @@ lazy val root = (project in file("."))
 
 		"org.lwjgl" % "lwjgl-glfw" % "3.2.3" classifier s"natives-windows",
 
+        "org.lwjgl" % "lwjgl-assimp" % "3.2.3",
+
+        "org.lwjgl" % "lwjgl-assimp" % "3.2.3" classifier s"natives-windows",
+
         "org.scalactic" %% "scalactic" % "3.1.2",
 
         "org.scalatest" %% "scalatest" % "3.1.2" % "test",

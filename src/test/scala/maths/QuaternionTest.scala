@@ -1,9 +1,9 @@
 package maths
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite._
 import scala.math._
 
-class QuaternionTest extends FunSuite {
+class QuaternionTest extends AnyFunSuite {
     test("rotate vector with 0,0,0 euler angles") {
         val v = Vector3(1f,0f,0f)
         val q = Quaternion.eulerRotation(0f,0f,0f)

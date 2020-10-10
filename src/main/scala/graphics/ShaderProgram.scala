@@ -13,25 +13,36 @@ class ShaderProgram {
     protected val id = glCreateProgram()
 
     def use() = {
-        glUseProgram(id)
+        if(ShaderProgram.currentProgram != Some(this)) {
+            glUseProgram(id)
+            ShaderProgram.currentProgram = Some(this)
+        }
     }
 
     /** Setting the uniform requires the shader program to be in use*/
+    def setUniform(name: String, value: Int) = {
+        use()
+        glUniform1i(glGetUniformLocation(id, name), value)
+    }
+
+
+    def setUniform(name: String, value: Float) = {
+        use()
+        glUniform1f(glGetUniformLocation(id, name), value)
+    }
+
     def setUniform(name: String, vector: Vector3): Unit = {
-        if(ShaderProgram.currentProgram != Some(this))
-            use()
+        use()
         glUniform3f(glGetUniformLocation(id, name), vector.x, vector.y, vector.z)
     }
 
     def setUniform(name: String, vector: Vector4) = {
-        if(ShaderProgram.currentProgram != Some(this))
-            use()
+        use()
         glUniform4f(glGetUniformLocation(id, name), vector.x, vector.y, vector.z, vector.w)
     }
 
-    def setUniform(name: String, m: Matrix4) = {
-        if(ShaderProgram.currentProgram != Some(this))
-            use()
+    def setUniform(name: String, m: Matrix4): Unit = {
+        use()
         val stack = MemoryStack.stackPush()
         val data = stack.mallocFloat(4*4)
         data.put(m.a00).put(m.a01).put(m.a02).put(m.a03)
@@ -42,15 +53,57 @@ class ShaderProgram {
         MemoryStack.stackPop()
     }
 
-    def setUniform(name: String, value: Float) = {
-        if(ShaderProgram.currentProgram != Some(this))
-            use()
-        glUniform1f(glGetUniformLocation(id, name), value)
+    def setUniform(name: String, m: Material): Unit = {
+        use()
+        setUniform(name + ".ambient", m.ambient)
+        setUniform(name + ".diffuse", m.diffuse)
+        setUniform(name + ".specular", m.specular)
+        setUniform(name + ".shininess", m.shininess)
+    }
+
+    def setUniform(name: String, l: PointLight): Unit = {
+        use()
+        setUniform(name + ".position", l.position)
+        setUniform(name + ".colour", l.colour)
+        setUniform(name + ".constant", l.constant)
+        setUniform(name + ".linear", l.linear)
+        setUniform(name + ".quadratic", l.quadratic)
+    }
+
+    //to do: make this generic function work
+    /**def setUniform[T](name: String, array: Array[T]): Unit = {
+        use()
+        val length = array.length
+        for (i <- 0 until length) {
+            setUniform(name + "[" + i + "]", array(i))
+        }
+    }*/
+    def setUniform(name: String, array: Array[Matrix4]): Unit = {
+        use()
+        val length = array.length
+        for (i <- 0 until length) {
+            setUniform(name + "[" + i + "]", array(i))
+        }
+    }
+
+    def setUniform(name: String, array: Array[PointLight]): Unit = {
+        use()
+        val length = array.length
+        for (i <- 0 until length) {
+            setUniform(name + "[" + i + "]", array(i))
+        }
+    }
+
+    def setUniform(name: String, array: Array[Material]): Unit = {
+        use()
+        val length = array.length
+        for (i <- 0 until length) {
+            setUniform(name + "[" + i + "]", array(i))
+        }
     }
 
     def setUniform(name: String, array: Array[Int]) = {
-        if(ShaderProgram.currentProgram != Some(this))
-            use()
+        use()
         val stack = MemoryStack.stackPush()
         val data = stack.mallocInt(array.size)
         data.put(array).flip()

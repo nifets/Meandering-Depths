@@ -18,6 +18,9 @@ import org.lwjgl.system.MemoryUtil._
 import input._
 import maths._
 import graphics._
+import physics._
+
+import graphics.animation._
 
 class Player(gameInput: InputContext) extends Renderable {
     private val inputComponent = new InputComponent(gameInput,
@@ -51,18 +54,20 @@ class Player(gameInput: InputContext) extends Renderable {
     var goingRight = false
     var goingUp = false
     var goingDown = false
-    def isMoving = goingForward || goingBackward || goingLeft || goingRight || goingUp || goingDown
+    var isFalling = true
+    var fallingSpeed = 0f
+    def isMoving = goingForward || goingBackward || goingLeft || goingRight || goingUp
 
     //simple cube mesh for now, will replace with something more complex later on
     val meshVao = {
-        val vertices = Array(-2f,-3f,-2f, 20f, 1f, 1f, 1f, 0.7f, -2f,-3f,-2f,20f,
-                              2f,-3f,-2f, 20f, 1f, 1f, 1f, 0.7f,  2f,-3f,-2f,20f,
-                             -2f, 3f,-2f, 20f, 1f, 1f, 1f, 0.7f, -2f, 3f,-2f,20f,
-                              2f, 3f,-2f, 20f, 1f, 1f, 1f, 0.7f,  2f, 3f, 2f,20f,
-                             -2f,-3f, 2f, 20f, 0.2f, 0.6f, 0.7f, 20f, -2f,-3f, 2f,20f,
-                              2f,-3f, 2f, 20f, 0.2f, 0.6f, 0.7f, 20f,  2f,-3f, 2f,20f,
-                             -2f, 3f, 2f, 20f, 0.2f, 0.6f, 0.7f, 20f, -2f, 3f, 2f,20f,
-                              2f, 3f, 2f, 20f, 0.2f, 0.6f, 0.7f, 20f,  2f, 3f, 2f,20f)
+        val vertices = Array(-1f,0f,-1f, 20f, 1f, 1f, 1f, 0.7f, -1f,0f,-1f,20f,
+                              1f,0f,-1f, 20f, 1f, 1f, 1f, 0.7f,  1f,0f,-1f,20f,
+                             -4f, 12f,-4f, 20f, 1f, 1f, 1f, 0.7f, -4f, 12f,-4f,20f,
+                              4f, 12f,-4f, 20f, 1f, 1f, 1f, 0.7f,  4f, 12f, 4f,20f,
+                             -1f,0f, 1f, 20f, 0.4f, 0.6f, 0.7f, 20f, -1f,0f, 1f,20f,
+                              1f,0f, 1f, 20f, 0.4f, 0.6f, 0.7f, 20f,  1f,0f, 1f,20f,
+                             -4f, 12f, 4f, 20f, 0.4f, 0.6f, 0.7f, 20f, -4f, 12f, 4f,20f,
+                              4f, 12f, 4f, 20f, 0.4f, 0.6f, 0.7f, 20f,  4f, 12f, 4f,20f)
 
         val indices = Array(0,2,1, 1,2,3, 0,4,2, 2,4,6, 0,1,4, 1,5,4,
                             2,6,3, 3,6,7, 3,7,1, 1,7,5, 7,4,5, 7,6,4)
@@ -100,41 +105,77 @@ class Player(gameInput: InputContext) extends Renderable {
         vao
     }
 
+    val model =
+        AnimatedModel.load("D:/Computer science/Scala/Meandering Depths/src/main/resources/models/cube.fbx")
+
     val vertexCount = 36
 
     def render(alpha: Float, shader: ShaderProgram) = {
-        glBindVertexArray(meshVao)
+        glBindVertexArray(model.modelVao)
         val m = worldTransform(alpha)
         shader.setUniform("worldTransform", m)
         //TO DO: change to normal matrix
-        shader.setUniform("normalTransform", m)
-        glDrawElements(GL_TRIANGLES, vertexCount, GL_UNSIGNED_INT, 0)
+        shader.setUniform("normalTransform", m.inv.t)
+        shader.setUniform("jointTransforms", model.jointTransforms)
+        //println(model.jointTransforms.toList)
+        glDrawElements(GL_TRIANGLES, model.vertexCount, GL_UNSIGNED_INT, 0)
     }
 
     //bugged, will fix later
     //rotate player based on orientation then translate to current position
     //def worldTransform(alpha: Float): Matrix4 = Matrix4.translation(position(alpha)) * orientationMatrix(alpha) * Matrix4.scaling(2f,2f,2f)
-    def worldTransform(alpha: Float): Matrix4 = Matrix4.translation(currPosition) * orientationMatrix(alpha) * Matrix4.scaling(2f,2f,2f)
+    def worldTransform(alpha: Float): Matrix4 = {    
+        Matrix4.translation(currPosition) * orientationMatrix(alpha) * Matrix4.scaling(0.2f,0.2f,0.2f)
+    }
 
     //bugged, will fix later
     //def orientationMatrix(alpha: Float): Matrix4 = Matrix3(right(alpha), worldUp, -front(alpha)).expand
     def orientationMatrix(alpha: Float): Matrix4 = Matrix3(currRight, worldUp, -currFront).expand
 
-    def update() = {
+    def update(terrainCollisionMesh: TerrainCollisionMesh, dt: Double) = {
         lastPosition = currPosition
+        var movement = Vector3(0f,0f,0f)
 
         if (goingForward)
-            currPosition += currFront * 0.3F
+            movement += currFront * 0.3F
         if (goingBackward)
-            currPosition -= currFront * 0.3F
+            movement -= currFront * 0.3F
         if (goingLeft)
-            currPosition -= currRight * 0.3F
+            movement -= currRight * 0.3F
         if (goingRight)
-            currPosition += currRight * 0.3F
-        if (goingUp)
-            currPosition += worldUp * 0.3F
-        if (goingDown)
-            currPosition -= worldUp * 0.3F
+            movement += currRight * 0.3F
+
+        var wantedPos = currPosition + movement
+        if (!isFalling && isMoving) {
+            terrainCollisionMesh.collide(wantedPos + Vector3(0f,2f,0f), Vector3(0f,-1f,0f), 4f) match {
+                case Some(t) => {
+                    currPosition = wantedPos + Vector3(0f,2f,0f) + t * Vector3(0f,-1f,0f)
+                    if (goingUp) {
+                        currPosition += Vector3(0f,1f,0f)
+                        isFalling = true
+                    }
+                }
+                case None => isFalling = true
+            }
+        }
+        else if (isFalling) {
+            terrainCollisionMesh.collide(wantedPos, Vector3(0f,-1f,0f), fallingSpeed) match {
+                case Some(t) => currPosition = wantedPos + Vector3(0f,-1f,0f) * t; isFalling = false
+                case None => {
+                    currPosition = wantedPos + Vector3(0f,-1f,0f) * fallingSpeed
+                    fallingSpeed += 0.02f
+                    if (fallingSpeed > 0.5f)
+                        fallingSpeed = 0.5f
+                }
+            }
+        }
+
+        if (isMoving)
+            model.setAnimation("Armature|Idle")
+        else
+            model.setAnimation("Armature|Idle")
+
+        model.update(dt)
 
     }
 }

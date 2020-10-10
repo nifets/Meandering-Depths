@@ -1,7 +1,7 @@
 package utils
 
 object MarchingCubes {
-    val MAX_TRIANGLES = 5
+    val MAX_TRIANGLES_PER_CUBE = 5
 
     /**Look-up table that maps each possible cube isovalue config to a triangle mesh of 0 to 5 triangles*/
     val CUBE_TO_POLYGONS: Array[Array[Int]] = Array(
