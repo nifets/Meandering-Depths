@@ -3,7 +3,7 @@
 A small project of mine, using Scala with LWJGL to create a 3D game of some kind. The main idea is having a character that explores an extensive cave system that expands "infinitely" in all directions. Not sure how the gameplay will work, some ideas would be trying to be as stealthy as possible, so as to not get noticed by the hostile creatures, and perhaps one goal of the game would be to escape the caves.
 
 Click to see video:
-[![Screenshot3](/src/main/resources/images/md3.png "Screenshot3")](https://www.youtube.com/watch?v=mQZDJdRH0ZQ)
+[![Screenshot3](/src/main/resources/images/md3.png "Screenshot3")](https://www.youtube.com/watch?v=Sp723U-i7vE)
 
 Features:
 -
