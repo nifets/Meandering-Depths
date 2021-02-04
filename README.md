@@ -1,6 +1,6 @@
 # Meandering-Depths
 
-A small project of mine, using Scala with LWJGL (OpenGL wrapper) to create a 3D game of some kind. er that explores an extensive cave system that expands "infinitely" in all directions. 
+A small project of mine, using Scala with LWJGL (OpenGL wrapper) to create a 3D game of some kind. The main idea is having the player explore an extensive cave system that expands "infinitely" in all directions. 
 
 
 Click to see video:
