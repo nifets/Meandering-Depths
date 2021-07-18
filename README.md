@@ -37,5 +37,3 @@ To do:
 
 -Entities 
 
--Hive mind creature that uses a neural network to learn to hide when the player is nearby (trained using screenshots of the game from the creature's perspectives)
-
